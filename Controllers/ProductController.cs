@@ -22,27 +22,9 @@ namespace CRUD.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-              return _context.ProductModel != null ?
-                          View(await _context.ProductModel.ToListAsync()) :
-                          Problem("Entity set 'CRUDPDBContext.ProductModel'  is null.");
-        }
-
-        // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.ProductModel == null)
-            {
-                return NotFound();
-            }
-
-            var productModel = await _context.ProductModel
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (productModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(productModel);
+            return _context.ProductModel != null
+                ? View(await _context.ProductModel.ToListAsync())
+                : Problem("Entity set 'CRUDPDBContext.ProductModel'  is null.");
         }
 
         // GET: Products/Create
@@ -56,7 +38,9 @@ namespace CRUD.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Code,Title,Price")] ProductModel productModel)
+        public async Task<IActionResult> Create(
+            [Bind("Id,Code,Title,Price")] ProductModel productModel
+        )
         {
             if (ModelState.IsValid)
             {
@@ -88,7 +72,10 @@ namespace CRUD.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Code,Title,Price")] ProductModel productModel)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Id,Code,Title,Price")] ProductModel productModel
+        )
         {
             if (id != productModel.Id)
             {
@@ -126,8 +113,7 @@ namespace CRUD.Controllers
                 return NotFound();
             }
 
-            var productModel = await _context.ProductModel
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var productModel = await _context.ProductModel.FirstOrDefaultAsync(m => m.Id == id);
             if (productModel == null)
             {
                 return NotFound();
@@ -146,18 +132,22 @@ namespace CRUD.Controllers
                 return Problem("Entity set 'CRUDPDBContext.ProductModel'  is null.");
             }
             var productModel = await _context.ProductModel.FindAsync(id);
-            if (productModel != null)
+            var orders = await _context.OrderModel.ToListAsync();
+            foreach (var order in orders)
             {
-                _context.ProductModel.Remove(productModel);
+                if (order.ProductId == productModel.Id)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
             }
-
+            _context.ProductModel.Remove(productModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductModelExists(int id)
         {
-          return (_context.ProductModel?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.ProductModel?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

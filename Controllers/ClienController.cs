@@ -19,33 +19,20 @@ namespace CRUD.Controllers
             _context = context;
         }
 
-        // GET: Order
         public async Task<IActionResult> Index()
         {
-              return _context.ClientModel != null ?
-                          View(await _context.ClientModel.ToListAsync()) :
-                          Problem("Entity set 'CRUDPDBContext.ClientModel'  is null.");
+            var clients = await _context.ClientModel.ToListAsync();
+            foreach (var client in clients)
+            {
+                client.Orders = await _context.OrderModel
+                    .Where(o => o.ClientId == client.Id)
+                    .Include(o => o.Product)
+                    .ToListAsync();
+            }
+            return View(clients);
         }
 
-        // GET: Order/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.ClientModel == null)
-            {
-                return NotFound();
-            }
-
-            var ClientModel = await _context.ClientModel
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (ClientModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(ClientModel);
-        }
-
-        // GET: Order/Create
+        // GET: CLient/Create
         public IActionResult Create()
         {
             return View();
@@ -56,7 +43,9 @@ namespace CRUD.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Email,Birthdate,Gender,Orders")] ClientModel clientModel)
+        public async Task<IActionResult> Create(
+            [Bind("Id,Name,Email,Birthdate,Gender")] ClientModel clientModel
+        )
         {
             if (ModelState.IsValid)
             {
@@ -88,7 +77,10 @@ namespace CRUD.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Email,Birthdate,Gender,Orders")] ClientModel clientModel)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Id,Name,Email,Birthdate,Gender")] ClientModel clientModel
+        )
         {
             if (id != clientModel.Id)
             {
@@ -126,8 +118,7 @@ namespace CRUD.Controllers
                 return NotFound();
             }
 
-            var clientModel = await _context.ClientModel
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var clientModel = await _context.ClientModel.FirstOrDefaultAsync(m => m.Id == id);
             if (clientModel == null)
             {
                 return NotFound();
@@ -157,7 +148,7 @@ namespace CRUD.Controllers
 
         private bool ClientModelExists(int id)
         {
-          return (_context.ClientModel?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.ClientModel?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

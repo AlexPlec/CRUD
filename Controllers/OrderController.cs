@@ -19,35 +19,26 @@ namespace CRUD.Controllers
             _context = context;
         }
 
-        // GET: Order
         public async Task<IActionResult> Index()
         {
-              return _context.OrderModel != null ?
-                          View(await _context.OrderModel.ToListAsync()) :
-                          Problem("Entity set 'CRUDPDBContext.OrderModel'  is null.");
-        }
+            var orders = await _context.OrderModel
+                .Include(o => o.Client)
+                .Include(o => o.Product)
+                .ToListAsync();
 
-        // GET: Order/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.OrderModel == null)
+            foreach (var order in orders)
             {
-                return NotFound();
+                order.Client.Name = order.Client?.Name;
+                order.Product.Title = order.Product?.Title;
             }
-
-            var orderModel = await _context.OrderModel
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (orderModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(orderModel);
+            return View(orders);
         }
 
         // GET: Order/Create
         public IActionResult Create()
         {
+            ViewBag.Products = _context.ProductModel.ToList();
+            ViewBag.Clients = _context.ClientModel.ToList();
             return View();
         }
 
@@ -57,7 +48,9 @@ namespace CRUD.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ClientId,Client,ProductId,Product,Quantity,Status")] OrderModel orderModel)
+        public async Task<IActionResult> Create(
+            [Bind("Id,ClientId,ProductId,Quantity,Status")] OrderModel orderModel
+        )
         {
             if (ModelState.IsValid)
             {
@@ -65,6 +58,8 @@ namespace CRUD.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Products = _context.ProductModel.ToList();
+            ViewBag.Clients = _context.ClientModel.ToList();
             return View(orderModel);
         }
 
@@ -77,10 +72,14 @@ namespace CRUD.Controllers
             }
 
             var orderModel = await _context.OrderModel.FindAsync(id);
+
             if (orderModel == null)
             {
                 return NotFound();
             }
+
+            ViewBag.Products = _context.ProductModel.ToList();
+            ViewBag.Clients = _context.ClientModel.ToList();
             return View(orderModel);
         }
 
@@ -89,7 +88,10 @@ namespace CRUD.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ClientId,Client,ProductId,Product,Quantity,Status")] OrderModel orderModel)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Id,ClientId,ProductId,Quantity,Status")] OrderModel orderModel
+        )
         {
             if (id != orderModel.Id)
             {
@@ -127,8 +129,7 @@ namespace CRUD.Controllers
                 return NotFound();
             }
 
-            var orderModel = await _context.OrderModel
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var orderModel = await _context.OrderModel.FirstOrDefaultAsync(m => m.Id == id);
             if (orderModel == null)
             {
                 return NotFound();
@@ -158,7 +159,7 @@ namespace CRUD.Controllers
 
         private bool OrderModelExists(int id)
         {
-          return (_context.OrderModel?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.OrderModel?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

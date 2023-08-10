@@ -24,9 +24,8 @@
             <th>
                 @Html.DisplayNameFor(model => model.Gender)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Orders)
-            </th>
+            <th>Orders Count</th>
+            <th>Average Order Price</th>
             <th></th>
         </tr>
     </thead>
@@ -45,12 +44,22 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Gender)
             </td>
+            <td>@(item.Orders.Count)</td>
+            <td> @if (item.Orders != null && item.Orders.Count > 0)
+        {
+            var averageOrderPrice = (decimal)0;
+            foreach (var order in item.Orders)
+            {
+                    averageOrderPrice += order.Quantity * order.Product.Price;
+            }
+             averageOrderPrice = averageOrderPrice / item.Orders.Count;
+              <span>@averageOrderPrice</span>
+        } else {
+              <span>No orders</span>
+        }
+        </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Orders)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>

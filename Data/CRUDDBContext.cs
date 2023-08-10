@@ -9,14 +9,11 @@ namespace CRUDModel.Data
 {
     public class CRUDPDBContext : DbContext
     {
-        public CRUDPDBContext (DbContextOptions<CRUDPDBContext> options)
-            : base(options)
-        {
-        }
+        public CRUDPDBContext(DbContextOptions<CRUDPDBContext> options)
+            : base(options) { }
 
-        public DbSet<CRUD.Models.ProductModel> ProductModel { get; set; } = default!;
-        public DbSet<CRUD.Models.ClientModel> ClientModel { get; set; } = default!;
-        public DbSet<CRUD.Models.OrderModel> OrderModel { get; set; } = default!;
-
+        public DbSet<CRUD.Models.ProductModel> ProductModel { get; set; }
+        public DbSet<CRUD.Models.ClientModel> ClientModel { get; set; }
+        public DbSet<CRUD.Models.OrderModel> OrderModel { get; set; }
     }
 }

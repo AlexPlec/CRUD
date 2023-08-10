@@ -17,7 +17,7 @@ namespace CRUD.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: true),
                     Birthdate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Gender = table.Column<int>(type: "INTEGER", nullable: false)
@@ -33,7 +33,7 @@ namespace CRUD.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Code = table.Column<string>(type: "TEXT", nullable: true),
+                    Code = table.Column<int>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
                     Price = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
@@ -49,27 +49,36 @@ namespace CRUD.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ClientId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Client = table.Column<string>(type: "TEXT", nullable: true),
                     ProductId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Product = table.Column<string>(type: "TEXT", nullable: true),
                     Quantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    ClientModelId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Status = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OrderModel", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OrderModel_ClientModel_ClientModelId",
-                        column: x => x.ClientModelId,
+                        name: "FK_OrderModel_ClientModel_ClientId",
+                        column: x => x.ClientId,
                         principalTable: "ClientModel",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderModel_ProductModel_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "ProductModel",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderModel_ClientModelId",
+                name: "IX_OrderModel_ClientId",
                 table: "OrderModel",
-                column: "ClientModelId");
+                column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderModel_ProductId",
+                table: "OrderModel",
+                column: "ProductId");
         }
 
         /// <inheritdoc />
@@ -79,10 +88,10 @@ namespace CRUD.Migrations
                 name: "OrderModel");
 
             migrationBuilder.DropTable(
-                name: "ProductModel");
+                name: "ClientModel");
 
             migrationBuilder.DropTable(
-                name: "ClientModel");
+                name: "ProductModel");
         }
     }
 }

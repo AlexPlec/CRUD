@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRUD.Migrations
 {
     [DbContext(typeof(CRUDPDBContext))]
-    [Migration("20230806103057_InitialCreate")]
+    [Migration("20230809184045_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -36,6 +36,8 @@ namespace CRUD.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -49,17 +51,8 @@ namespace CRUD.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Client")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("ClientId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ClientModelId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Product")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
@@ -72,7 +65,9 @@ namespace CRUD.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientModelId");
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("OrderModel");
                 });
@@ -83,8 +78,8 @@ namespace CRUD.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Code")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Code")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
@@ -99,9 +94,21 @@ namespace CRUD.Migrations
 
             modelBuilder.Entity("CRUD.Models.OrderModel", b =>
                 {
-                    b.HasOne("CRUD.Models.ClientModel", null)
+                    b.HasOne("CRUD.Models.ClientModel", "Client")
                         .WithMany("Orders")
-                        .HasForeignKey("ClientModelId");
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CRUD.Models.ProductModel", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("CRUD.Models.ClientModel", b =>
