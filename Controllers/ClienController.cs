@@ -21,7 +21,21 @@ namespace CRUD.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var clients = await _context.ClientModel.ToListAsync();
+            var clients = await _context.ClientModel
+                .Select(
+                    client =>
+                        new ClientModel
+                        {
+                            Id = client.Id,
+                            Name = client.Name,
+                            Email = client.Email,
+                            Birthdate = client.Birthdate,
+                            Gender = client.Gender,
+                            Orders = client.Orders
+                        }
+                )
+                .ToListAsync();
+
             foreach (var client in clients)
             {
                 client.Orders = await _context.OrderModel

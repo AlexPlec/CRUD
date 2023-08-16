@@ -19,9 +19,25 @@ namespace CRUD.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+         public async Task<IActionResult> Index()
         {
-            var orders = await _context.OrderModel
+         var orders = await _context.OrderModel
+                .Select(
+                    order =>
+                        new OrderModel
+                        {
+                            Id = order.Id,
+                            ClientId = order.ClientId,
+                            Client = order.Client,
+                            ProductId = order.ProductId,
+                            Product = order.Product,
+                            Quantity = order.Quantity,
+                            Status = order.Status
+                        }
+                )
+                .ToListAsync();
+        {
+             orders = await _context.OrderModel
                 .Include(o => o.Client)
                 .Include(o => o.Product)
                 .ToListAsync();
@@ -32,6 +48,7 @@ namespace CRUD.Controllers
                 order.Product.Title = order.Product?.Title;
             }
             return View(orders);
+        }
         }
 
         // GET: Order/Create
@@ -55,7 +72,7 @@ namespace CRUD.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(orderModel);
-                await _context.SaveChangesAsync();
+                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.Products = _context.ProductModel.ToList();
